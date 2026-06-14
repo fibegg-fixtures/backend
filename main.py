@@ -29,10 +29,11 @@ async def open_headers(request, call_next):
 
 def branch():
     try:
-        head = os.getenv("GIT_BRANCH") or (Path(".git") / "HEAD").read_text().strip()
+        head = (Path(".git") / "HEAD").read_text().strip()
+        return head.removeprefix("ref: refs/heads/") if head.startswith("ref:") else head[:7]
     except OSError:
-        return None
-    return head.removeprefix("ref: refs/heads/") if head.startswith("ref:") else head[:7]
+        pass
+    return os.getenv("GIT_BRANCH")
 
 
 def stream():
