@@ -8,7 +8,6 @@ services:
       UV_PROJECT_ENVIRONMENT: /tmp/venv
       KAFKA: kafka:29092
       TOPIC: people
-      GIT_BRANCH: main
     volumes: ["./:/app"]
     command: sh -c "pip install uv && uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload --proxy-headers --forwarded-allow-ips \"*\""
     labels:
@@ -30,7 +29,6 @@ services:
       CHOKIDAR_USEPOLLING: "true"
       VITE_INTERVAL: 5
       VITE_API: http://localhost:8000
-      GIT_BRANCH: main
     volumes:
       - "../frontend:/app"
       - "frontend_node_modules:/app/node_modules"
@@ -70,54 +68,14 @@ services:
       X: 5
       TOPIC: people
       KAFKA: kafka:29092
-    volumes: ["./:/app"]
+    volumes: ["${FIBE_SERVICES_API_PATH:-.}:/app"]
     command: sh -c "pip install uv && uv run python producer.py"
-    labels:
-      fibe.gg/repo_url: https://github.com/fibegg-fixtures/backend
-      fibe.gg/branch: main
-      fibe.gg/source_mount: /app
-      fibe.gg/production: "false"
-      fibe.gg/start_command: sh -c "pip install uv && uv run python producer.py"
 
 volumes:
   frontend_node_modules:
 
 x-fibe.gg:
   variables:
-    BACKEND_REPO:
-      name: "Backend Repository URL"
-      required: true
-      default: "https://github.com/fibegg-fixtures/backend"
-      paths:
-        - services.api.labels.fibe.gg/repo_url
-        - services.producer.labels.fibe.gg/repo_url
-    FRONTEND_REPO:
-      name: "Frontend Repository URL"
-      required: true
-      default: "https://github.com/fibegg-fixtures/frontend"
-      path: services.frontend.labels.fibe.gg/repo_url
-    BRANCH:
-      name: "Branch"
-      required: true
-      default: "main"
-      paths:
-        - services.api.environment.GIT_BRANCH
-        - services.api.labels.fibe.gg/branch
-        - services.frontend.environment.GIT_BRANCH
-        - services.frontend.labels.fibe.gg/branch
-        - services.producer.labels.fibe.gg/branch
-    SUBDOMAIN:
-      name: "Subdomain"
-      required: true
-      default: "people"
-      validation: "/^[a-z0-9][a-z0-9-]*[a-z0-9]$/"
-      path: services.frontend.labels.fibe.gg/subdomain
-    API_SUBDOMAIN:
-      name: "API Subdomain"
-      required: true
-      default: "api-people"
-      validation: "/^[a-z0-9][a-z0-9-]*[a-z0-9]$/"
-      path: services.api.labels.fibe.gg/subdomain
     VITE_API:
       name: "Vite API URL"
       required: true
