@@ -10,6 +10,16 @@ services:
       TOPIC: people
     volumes: ["./:/app"]
     command: sh -c "pip install uv && uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload --proxy-headers --forwarded-allow-ips \"*\""
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >
+          import urllib.request; r=urllib.request.urlopen("http://localhost:8000/events", timeout=5); data=r.readline()+r.readline(); raise SystemExit(0 if b'"ok": true' in data else 1)
+      interval: 5s
+      timeout: 6s
+      retries: 30
     labels:
       fibe.gg/repo_url: https://github.com/fibegg-fixtures/backend
       fibe.gg/branch: main
@@ -33,6 +43,15 @@ services:
       - "../frontend:/app"
       - "frontend_node_modules:/app/node_modules"
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "require('http').get('http://localhost:5173', r => process.exit(r.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))"
+      interval: 5s
+      timeout: 3s
+      retries: 30
     labels:
       fibe.gg/repo_url: https://github.com/fibegg-fixtures/frontend
       fibe.gg/branch: main
@@ -58,6 +77,11 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
 
   producer:
     image: python:3.12-slim
