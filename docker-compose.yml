@@ -105,6 +105,16 @@ x-fibe.gg:
       required: true
       default: "https://api-people.fibe.live"
       path: services.frontend.environment.VITE_API
+    API_SUBDOMAIN:
+      name: "API subdomain name"
+      required: true
+      default: "api-people"
+      path: services.api.labels.fibe.gg/subdomain
+    SUBDOMAIN:
+      name: "Vite API URL"
+      required: true
+      default: "people"
+      path: services.frontend.labels.fibe.gg/subdomain
     INTERVAL:
       name: "Interval"
       required: true
