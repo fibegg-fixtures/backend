@@ -20,15 +20,6 @@ services:
       interval: 5s
       timeout: 6s
       retries: 30
-    labels:
-      fibe.gg/repo_url: https://github.com/fibegg-fixtures/backend
-      fibe.gg/branch: main
-      fibe.gg/source_mount: /app
-      fibe.gg/production: "false"
-      fibe.gg/start_command: sh -c "pip install uv && uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload --proxy-headers --forwarded-allow-ips \"*\""
-      fibe.gg/port: 8000
-      fibe.gg/visibility: external
-      fibe.gg/subdomain: api-people
 
   frontend:
     image: node:22-slim
@@ -52,15 +43,6 @@ services:
       interval: 5s
       timeout: 3s
       retries: 30
-    labels:
-      fibe.gg/repo_url: https://github.com/fibegg-fixtures/frontend
-      fibe.gg/branch: main
-      fibe.gg/source_mount: /app
-      fibe.gg/production: "false"
-      fibe.gg/start_command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
-      fibe.gg/port: 5173
-      fibe.gg/visibility: external
-      fibe.gg/subdomain: people
 
   kafka:
     image: apache/kafka:4.1.2
@@ -97,33 +79,3 @@ services:
 
 volumes:
   frontend_node_modules:
-
-x-fibe.gg:
-  variables:
-    VITE_API:
-      name: "Vite API URL"
-      required: true
-      default: "https://api-people.fibe.live"
-      path: services.frontend.environment.VITE_API
-    API_SUBDOMAIN:
-      name: "API subdomain name"
-      required: true
-      default: "api-people"
-      path: services.api.labels.fibe.gg/subdomain
-    SUBDOMAIN:
-      name: "Vite API URL"
-      required: true
-      default: "people"
-      path: services.frontend.labels.fibe.gg/subdomain
-    INTERVAL:
-      name: "Interval"
-      required: true
-      default: "5"
-      validation: "/^[0-9]+$/"
-      paths:
-        - services.frontend.environment.VITE_INTERVAL
-        - services.producer.environment.X
-  metadata:
-    description: "People Stream Application"
-    category: "Development"
-    source_defaults: true
